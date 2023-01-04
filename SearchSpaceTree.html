@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Search Space Tree Tool</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="SearchSpaceTree.js"></script>
+  <script type="module">
+
+    import {treemap} from "https://cdn.skypack.dev/d3-hierarchy@3";
+    
+    const tree = treemap();
+    
+    </script>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <h1>Search Space Tree Tool</h1>
+  <div id="wrapper">    
+    <div id="inputZone">
+      <form>
+        <label for="fileInput">Select a .sp_log file:</label><br>
+        <input type="file" id="file-input" accept=".sp_log">
+      </form>
+    </div>
+  </div>
+  <svg width="500" height="500" id="tree">
+    <g id="root"></g>
+  </svg>  
+</body>
+</html>

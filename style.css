@@ -1,0 +1,10 @@
+h1 {
+    text-align: center;
+}
+
+#wrapper {
+    text-align: center;
+  }
+  #inputZone {
+    display: inline-block;
+  }
