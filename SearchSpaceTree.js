@@ -157,6 +157,15 @@ function update(source) {
             return diagonal(o, o)
         });
 
+    // Make link thicker and darker if visited
+    linkEnter.style("stroke", function(d) {
+            return d.data.visited ? "lightsteelblue" : "#ccc";
+        })
+        .style("stroke-width", function(d) {
+            return d.data.visited ? "3px" : "1px";
+        });
+
+
     // UPDATE
     var linkUpdate = linkEnter.merge(link);
 
