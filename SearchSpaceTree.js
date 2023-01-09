@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // append the svg object to the body of the page
     // appends a 'group' element to 'svg'
     // moves the 'group' element to the top left margin
-    svg = d3.select("body").append("svg")
+    svg = d3.select("#treePanel").append("svg")
         .attr("width", width + margin.right + margin.left)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
@@ -73,7 +73,7 @@ function update(source) {
 
     // Update the nodes...
     var node = svg.selectAll('g.node')
-        .data(nodes, function(d) { return d.id || (d.id = ++i); });
+        .data(nodes, function(d) { return d.id || (d.id = ++i);  });
 
     // Enter any new modes at the parent's previous position.
     var nodeEnter = node.enter().append('g')
@@ -187,6 +187,7 @@ function update(source) {
     nodes.forEach(function(d) {
         d.x0 = d.x;
         d.y0 = d.y;
+        d.data.state = parseData(d.data.state);
     });
 
     // Creates a curved (diagonal) path from parent to the child nodes
@@ -208,8 +209,90 @@ function update(source) {
         } else {
             d.children = d._children;
             d._children = null;
-            console.log("TEST");
         }
         update(d);
+        fillTables(d.currentTarget.__data__.data.state,d.currentTarget.__data__.parent.data.state);
     }
 }
+
+function fillTables(data,parentData){
+  fillAngleTable(data,parentData);
+  fillFreeTable(data,parentData)
+  fillActionTable(data,parentData);
+}
+
+function parseData(data){
+  if (typeof data === 'string' || data instanceof String)
+  {
+    var dict = {};
+    var notTheEnd = true
+    var value;
+    while(notTheEnd)
+    {
+      var variable = data.substring(
+        data.indexOf("(") + 1, 
+        data.indexOf(")"));
+      data = data.substring(data.indexOf("=")+1);
+      if(data.indexOf("(") != -1){
+        value= data.substring(0,data.indexOf("("));
+      }
+      else
+      {
+        value = data;
+        notTheEnd=false;
+      }
+      dict[variable]=value;
+    }
+    return dict;
+  }
+  return data;
+}
+
+function fillAngleTable(data,parentData)
+{
+  var table = document.getElementById("valueTable");
+  table.innerHTML = "";
+  var filtered = Object.fromEntries(Object.entries(data).filter(([k,v]) => k.startsWith("angle")));
+  addHeadRow("valueTable",filtered)
+  addValueRow("valueTable",filtered,parentData)
+}
+
+function fillFreeTable(data,parentData)
+{
+  var table = document.getElementById("freeTable");
+  table.innerHTML = "";
+  var filtered = Object.fromEntries(Object.entries(data).filter(([k,v]) => k.startsWith("freeToMove")));
+  addHeadRow("freeTable",filtered)
+  addValueRow("freeTable",filtered,parentData)
+}
+
+function fillActionTable(data,parentData)
+{
+  var table = document.getElementById("actionTable");
+  table.innerHTML = "";
+  var filtered = Object.fromEntries(Object.entries(data).filter(([k,v]) => k=="time" || k=="in-use"));
+  addHeadRow("actionTable",filtered)
+  addValueRow("actionTable",filtered,parentData)
+}
+
+  function addHeadRow(tableName,headRow)
+  {
+    var table = document.getElementById(tableName);
+    var header = table.createTHead();
+    var row = header.insertRow(0);  
+    Object.keys(headRow).forEach(element => row.insertCell(-1).innerHTML=element) ;
+  }
+
+  function addValueRow(tableName,valueRow,parentData)
+  {
+    var table = document.getElementById(tableName);
+    var row = table.insertRow(-1);  
+    Object.keys(valueRow).forEach(element => {
+    
+      if(valueRow[element]!=parentData[element])
+      {
+        var cell =row.insertCell(-1).innerHTML="<b>"+valueRow[element]+"</b>";
+      }
+      else var cell =row.insertCell(-1).innerHTML=valueRow[element];
+    }) ;
+  }
