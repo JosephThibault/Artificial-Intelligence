@@ -211,7 +211,12 @@ function update(source) {
             d._children = null;
         }
         update(d);
-        fillTables(d.currentTarget.__data__.data.state,d.currentTarget.__data__.parent.data.state);
+        var parentData = null;
+        if(d.currentTarget.__data__.parent != null)
+        {
+            parentData = d.currentTarget.__data__.parent.data.state
+        }
+        fillTables(d.currentTarget.__data__.data.state,parentData);
     }
 }
 
@@ -287,7 +292,7 @@ function fillActionTable(data,parentData)
     var row = table.insertRow(-1);  
     Object.keys(valueRow).forEach(element => {
     
-      if(valueRow[element]!=parentData[element])
+      if(parentData != null && valueRow[element]!=parentData[element])
       {
         row.insertCell(-1).innerHTML="<b>"+valueRow[element]+"</b>";
       }
