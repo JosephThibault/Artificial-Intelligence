@@ -212,11 +212,22 @@ function update(source) {
         }
         update(d);
         var parentData = null;
+        var nodeData = d.currentTarget.__data__.data;
         if(d.currentTarget.__data__.parent != null)
         {
-            parentData = d.currentTarget.__data__.parent.data.state
+            parentData = d.currentTarget.__data__.parent.data;
         }
-        fillTables(d.currentTarget.__data__.data.state,parentData);
+
+        var distance = document.getElementById("distance");
+        distance.innerHTML=nodeData.distance;
+
+        var action = document.getElementById("action");
+        action.innerHTML=nodeData.action;
+
+        var actionCost = document.getElementById("actionCost");
+        actionCost.innerHTML=nodeData.action_cost_to_get_here;
+
+        fillTables(nodeData.state,parentData.state);
     }
 }
 
