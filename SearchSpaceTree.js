@@ -229,9 +229,7 @@ function parseData(data){
     var value;
     while(notTheEnd)
     {
-      var variable = data.substring(
-        data.indexOf("(") + 1, 
-        data.indexOf(")"));
+      var variable = data.substring(data.indexOf("(") + 1, data.indexOf(")"));
       data = data.substring(data.indexOf("=")+1);
       if(data.indexOf("(") != -1){
         value= data.substring(0,data.indexOf("("));
@@ -250,11 +248,11 @@ function parseData(data){
 
 function fillAngleTable(data,parentData)
 {
-  var table = document.getElementById("valueTable");
+  var table = document.getElementById("angleTable");
   table.innerHTML = "";
   var filtered = Object.fromEntries(Object.entries(data).filter(([k,v]) => k.startsWith("angle")));
-  addHeadRow("valueTable",filtered)
-  addValueRow("valueTable",filtered,parentData)
+  addHeadRow("angleTable",filtered)
+  addValueRow("angleTable",filtered,parentData)
 }
 
 function fillFreeTable(data,parentData)
@@ -291,8 +289,8 @@ function fillActionTable(data,parentData)
     
       if(valueRow[element]!=parentData[element])
       {
-        var cell =row.insertCell(-1).innerHTML="<b>"+valueRow[element]+"</b>";
+        row.insertCell(-1).innerHTML="<b>"+valueRow[element]+"</b>";
       }
-      else var cell =row.insertCell(-1).innerHTML=valueRow[element];
+      else row.insertCell(-1).innerHTML=valueRow[element];
     }) ;
   }
