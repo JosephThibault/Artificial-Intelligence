@@ -101,7 +101,11 @@ function update(source) {
         .attr("text-anchor", function(d) {
             return d.children || d._children ? "end" : "start";
         })
-        .text(function(d) { return d.data.visit_step; });
+        .text(function(d) { 
+            var text = d.data.visit_step;
+            if(d.data.action !=null) text= text + " " + d.data.action;
+            return text;
+        });
 
     // UPDATE
     var nodeUpdate = nodeEnter.merge(node);
@@ -227,14 +231,23 @@ function update(source) {
         var actionCost = document.getElementById("actionCost");
         actionCost.innerHTML=nodeData.action_cost_to_get_here;
 
-        fillTables(nodeData.state,parentData.state);
+        fillpredicateTable(nodeData.state,parentData.state);
     }
 }
 
-function fillTables(data,parentData){
-  fillAngleTable(data,parentData);
-  fillFreeTable(data,parentData)
-  fillActionTable(data,parentData);
+function fillpredicateTable(data,parentData)
+{
+    var table = document.getElementById("predicateTable");
+    table.innerHTML = "";
+
+    var filtered = Object.fromEntries(Object.entries(data).filter(([k,v]) => k.startsWith("angle")));
+    addValueRow(filtered,parentData)
+
+    var filtered = Object.fromEntries(Object.entries(data).filter(([k,v]) => k.startsWith("freeToMove")));
+    addValueRow(filtered,parentData)
+
+    var filtered = Object.fromEntries(Object.entries(data).filter(([k,v]) => k=="time" || k=="in-use"));
+    addValueRow(filtered,parentData)
 }
 
 function parseData(data){
@@ -262,47 +275,12 @@ function parseData(data){
   return data;
 }
 
-function fillAngleTable(data,parentData)
-{
-  var table = document.getElementById("angleTable");
-  table.innerHTML = "";
-  var filtered = Object.fromEntries(Object.entries(data).filter(([k,v]) => k.startsWith("angle")));
-  addHeadRow("angleTable",filtered)
-  addValueRow("angleTable",filtered,parentData)
-}
-
-function fillFreeTable(data,parentData)
-{
-  var table = document.getElementById("freeTable");
-  table.innerHTML = "";
-  var filtered = Object.fromEntries(Object.entries(data).filter(([k,v]) => k.startsWith("freeToMove")));
-  addHeadRow("freeTable",filtered)
-  addValueRow("freeTable",filtered,parentData)
-}
-
-function fillActionTable(data,parentData)
-{
-  var table = document.getElementById("actionTable");
-  table.innerHTML = "";
-  var filtered = Object.fromEntries(Object.entries(data).filter(([k,v]) => k=="time" || k=="in-use"));
-  addHeadRow("actionTable",filtered)
-  addValueRow("actionTable",filtered,parentData)
-}
-
-  function addHeadRow(tableName,headRow)
+  function addValueRow(valueRow,parentData)
   {
-    var table = document.getElementById(tableName);
-    var header = table.createTHead();
-    var row = header.insertRow(0);  
-    Object.keys(headRow).forEach(element => row.insertCell(-1).innerHTML=element) ;
-  }
-
-  function addValueRow(tableName,valueRow,parentData)
-  {
-    var table = document.getElementById(tableName);
-    var row = table.insertRow(-1);  
+    var table = document.getElementById("predicateTable");
     Object.keys(valueRow).forEach(element => {
-    
+      var row = table.insertRow(-1);  
+      row.insertCell(-1).innerHTML= element;
       if(parentData != null && valueRow[element]!=parentData[element])
       {
         row.insertCell(-1).innerHTML="<b>"+valueRow[element]+"</b>";
