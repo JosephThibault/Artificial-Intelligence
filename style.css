@@ -7,6 +7,16 @@ h1 {
   color:red;
 }
 
+#treePanel {
+  height: 650px;
+  border: solid 2px black;
+margin: 30px;
+}
+
+.selected {
+  fill: red;
+}
+
 #wrapper {
     text-align: center;
   }

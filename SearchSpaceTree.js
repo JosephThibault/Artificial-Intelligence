@@ -1,6 +1,6 @@
 var treeData;
 // Set the dimensions and margins of the diagram
-var margin = { top: 20, right: 90, bottom: 30, left: 90 },
+var margin = { top: 250, right: 0, bottom: 30, left: 0 },
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 var i = 0,
@@ -15,13 +15,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // appends a 'group' element to 'svg'
     // moves the 'group' element to the top left margin
     svg = d3.select("#treePanel").append("svg")
-        .attr("width", width + margin.right + margin.left)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .call(d3.zoom().on("zoom", function () {
+            svg.attr("transform", d3.event.transform)
+         }))
         .append("g")
-        .attr("transform", "translate(" +
-            margin.left + "," + margin.top + ")");
+        //.attr("transform", "translate(" +
+          //  margin.left + "," + margin.top + ")");
     // declares a tree layout and assigns the size
-    treemap = d3.tree().size([height, width]);
+    treemap = d3.tree().nodeSize([25, 25]);
+
     // Select the file input element
     document.getElementById('fileInput')
         .addEventListener('change', function() {
@@ -37,6 +41,10 @@ document.addEventListener('DOMContentLoaded', function() {
 })
 
 function loadTree() {
+    // Empty predicateTable
+    var table = document.getElementById("predicateTable");
+    table.innerHTML = "";
+
     // Assigns parent, children, height, depth
     root = d3.hierarchy(JSON.parse(treeData), function(d) { return d.children; });
     root.x0 = height / 2;
@@ -73,7 +81,12 @@ function update(source) {
 
     // Update the nodes...
     var node = svg.selectAll('g.node')
-        .data(nodes, function(d) { return d.id || (d.id = ++i);  });
+        .data(nodes, function(d) { return d.id || (d.id = ++i);  })
+        .attr("class", "node")
+        .on("click", function(d) {
+            d3.selectAll(".node").classed("selected", false);
+            d3.select(this).classed("selected", true);
+        });;
 
     // Enter any new modes at the parent's previous position.
     var nodeEnter = node.enter().append('g')
@@ -194,6 +207,7 @@ function update(source) {
         d.data.state = parseData(d.data.state);
     });
 
+
     // Creates a curved (diagonal) path from parent to the child nodes
     function diagonal(s, d) {
 
@@ -207,19 +221,13 @@ function update(source) {
 
     // Toggle children on click.
     function click(d) {
-        if (d.children) {
-            d._children = d.children;
-            d.children = null;
-        } else {
-            d.children = d._children;
-            d._children = null;
-        }
+
         update(d);
         var parentData = null;
-        var nodeData = d.currentTarget.__data__.data;
-        if(d.currentTarget.__data__.parent != null)
+        var nodeData = d.data;
+        if(d.parent != null)
         {
-            parentData = d.currentTarget.__data__.parent.data;
+            parentData = d.parent.data;
         }
 
         var distance = document.getElementById("distance");
@@ -240,14 +248,20 @@ function fillpredicateTable(data,parentData)
     var table = document.getElementById("predicateTable");
     table.innerHTML = "";
 
-    var filtered = Object.fromEntries(Object.entries(data).filter(([k,v]) => k.startsWith("angle")));
-    addValueRow(filtered,parentData)
-
-    var filtered = Object.fromEntries(Object.entries(data).filter(([k,v]) => k.startsWith("freeToMove")));
-    addValueRow(filtered,parentData)
-
-    var filtered = Object.fromEntries(Object.entries(data).filter(([k,v]) => k=="time" || k=="in-use"));
-    addValueRow(filtered,parentData)
+    Object.keys(data).forEach(element => {
+      var row = table.insertRow(-1);  
+      
+      if(parentData != null && data[element]!=parentData[element])
+      {
+        row.insertCell(-1).innerHTML= "<b>"+element+"</b>";
+        row.insertCell(-1).innerHTML="<b>"+data[element]+"</b>";
+      }
+      else 
+      {
+        row.insertCell(-1).innerHTML= element;
+        row.insertCell(-1).innerHTML=data[element];
+      }
+    }) ;
 }
 
 function parseData(data){
@@ -274,17 +288,3 @@ function parseData(data){
   }
   return data;
 }
-
-  function addValueRow(valueRow,parentData)
-  {
-    var table = document.getElementById("predicateTable");
-    Object.keys(valueRow).forEach(element => {
-      var row = table.insertRow(-1);  
-      row.insertCell(-1).innerHTML= element;
-      if(parentData != null && valueRow[element]!=parentData[element])
-      {
-        row.insertCell(-1).innerHTML="<b>"+valueRow[element]+"</b>";
-      }
-      else row.insertCell(-1).innerHTML=valueRow[element];
-    }) ;
-  }
