@@ -17,18 +17,25 @@ document.addEventListener('DOMContentLoaded', function() {
     svg = d3.select("#treePanel").append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
-        .call(d3.zoom().on("zoom", function () {
-            svg.attr("transform", d3.event.transform)
-         }))
+        .call(d3.zoom().on("zoom", function() {
+            //limit zoom
+            if (d3.event.transform.k > 5) {
+                d3.event.transform.k = 5;
+            } else if (d3.event.transform.k < 0.1) {
+                d3.event.transform.k = 0.1;
+            }
+            svg.attr("transform", d3.event.transform);
+        }))
         .append("g")
         //.attr("transform", "translate(" +
-          //  margin.left + "," + margin.top + ")");
-    // declares a tree layout and assigns the size
+        //  margin.left + "," + margin.top + ")");
+        // declares a tree layout and assigns the size
     treemap = d3.tree().nodeSize([25, 25]);
 
     // Select the file input element
     document.getElementById('fileInput')
         .addEventListener('change', function() {
+            // Read the file
             var fr = new FileReader();
             fr.onload = function() {
                 treeData = fr.result.replaceAll("descendants", "children");
@@ -81,12 +88,8 @@ function update(source) {
 
     // Update the nodes...
     var node = svg.selectAll('g.node')
-        .data(nodes, function(d) { return d.id || (d.id = ++i);  })
-        .attr("class", "node")
-        .on("click", function(d) {
-            d3.selectAll(".node").classed("selected", false);
-            d3.select(this).classed("selected", true);
-        });;
+        .data(nodes, function(d) { return d.id || (d.id = ++i); })
+        .attr("class", "node");
 
     // Enter any new modes at the parent's previous position.
     var nodeEnter = node.enter().append('g')
@@ -94,8 +97,37 @@ function update(source) {
         .attr("transform", function(d) {
             return "translate(" + source.y0 + "," + source.x0 + ")";
         })
-        .on('click', click);
+        .on("click", function(d) {
+            d3.selectAll(".node").classed("selected", false);
+            d3.select(this).classed("selected", true);
+            //change all other nodes outline color
+            d3.selectAll(".node").select('circle.node')
+                .style("stroke", function(dd) {
+                    //black if visited
+                    return dd.data.visited ? "black" : "#4682B4";
+                })
+                .style("stroke-width", "2px");
+            //change node outline color and border thickness animation
+            d3.select(this).select('circle.node')
+                .style("stroke", "red")
+                .style("stroke-width", "4px");
+            click(d);
 
+        })
+        .on("mouseover", function(d) {
+            //change size timed
+            d3.select(this).select('circle.node')
+                .transition()
+                .duration(100)
+                .attr('r', 13);
+        })
+        .on("mouseout", function(d) {
+            //change size
+            d3.select(this).select('circle.node')
+                .transition()
+                .duration(100)
+                .attr('r', 10);
+        });
     // Add Circle for the nodes
     nodeEnter.append('circle')
         .attr('class', 'node')
@@ -108,15 +140,41 @@ function update(source) {
     // Add labels for the nodes
     nodeEnter.append('text')
         .attr("dy", ".35em")
-        .attr("x", function(d) {
-            return d.children || d._children ? -13 : 13;
-        })
-        .attr("text-anchor", function(d) {
-            return d.children || d._children ? "end" : "start";
-        })
-        .text(function(d) { 
+        .attr("x", -15)
+        .attr("text-anchor", "end")
+        .text(function(d) {
             var text = d.data.visit_step;
-            if(d.data.action !=null) text= text + " " + d.data.action;
+            return text;
+        });
+
+    nodeEnter.append('text')
+        .attr("dy", "-.25em")
+        .attr("x", 15)
+        .text(function(d) {
+            var text = "";
+            if (d.data.action != null) {
+                var posSpace = d.data.action.substring((d.data.action.length / 2) - 1, d.data.action.length).indexOf(" ");
+                if (posSpace != -1) text = d.data.action.substring(0, (d.data.action.length / 2) - 1 + posSpace);
+                else text = d.data.action;
+            }
+            return text;
+        });
+
+    nodeEnter.append('text')
+        .attr("dy", ".95em")
+        .attr("x", 15)
+        // .attr("x", function(d) {
+        //     return d.children || d._children ? -15 : 15;
+        // })
+        // .attr("text-anchor", function(d) {
+        //     return d.children || d._children ? "end" : "start";
+        // })
+        .text(function(d) {
+            var text = "";
+            if (d.data.action != null) {
+                var posSpace = d.data.action.substring((d.data.action.length / 2) - 1, d.data.action.length).indexOf(" ");
+                if (posSpace != -1) text = d.data.action.substring((d.data.action.length / 2) - 1 + posSpace + 1, d.data.action.length);
+            }
             return text;
         });
 
@@ -136,12 +194,13 @@ function update(source) {
         //outline
         .style("stroke", function(d) {
             //black if visited
-            return d.data.visited ? "black" : "#lightsteelblue";
+            return d.data.visited ? "black" : "#4682B4";
         })
         .style("fill", function(d) {
             //fill if visited
             return d.data.visited ? "lightsteelblue" : "#fff";
         })
+        .style("stroke-width", "2px")
         .attr('cursor', 'pointer');
 
     // Remove any exiting nodes
@@ -176,7 +235,7 @@ function update(source) {
 
     // Make link thicker and darker if visited
     linkEnter.style("stroke", function(d) {
-            return d.data.visited ? "lightsteelblue" : "#ccc";
+            return d.data.visited ? "#4682B4" : "#999";
         })
         .style("stroke-width", function(d) {
             return d.data.visited ? "3px" : "1px";
@@ -221,70 +280,77 @@ function update(source) {
 
     // Toggle children on click.
     function click(d) {
-
-        update(d);
+        //update(d);
         var parentData = null;
         var nodeData = d.data;
-        if(d.parent != null)
-        {
+        if (d.parent != null) {
             parentData = d.parent.data;
         }
 
         var distance = document.getElementById("distance");
-        distance.innerHTML=nodeData.distance;
+        distance.innerHTML = nodeData.distance;
 
         var action = document.getElementById("action");
-        action.innerHTML=nodeData.action;
+        action.innerHTML = nodeData.action;
 
         var actionCost = document.getElementById("actionCost");
-        actionCost.innerHTML=nodeData.action_cost_to_get_here;
+        actionCost.innerHTML = nodeData.action_cost_to_get_here;
 
-        fillpredicateTable(nodeData.state,parentData.state);
+        if (parentData == null) {
+            fillpredicateTable(nodeData.state);
+        } else {
+            fillpredicateTable(nodeData.state, parentData.state);
+        }
+
     }
 }
 
-function fillpredicateTable(data,parentData)
-{
+function fillpredicateTable(data, parentData = null) {
     var table = document.getElementById("predicateTable");
     table.innerHTML = "";
 
     Object.keys(data).forEach(element => {
-      var row = table.insertRow(-1);  
-      
-      if(parentData != null && data[element]!=parentData[element])
-      {
-        row.insertCell(-1).innerHTML= "<b>"+element+"</b>";
-        row.insertCell(-1).innerHTML="<b>"+data[element]+"</b>";
-      }
-      else 
-      {
-        row.insertCell(-1).innerHTML= element;
-        row.insertCell(-1).innerHTML=data[element];
-      }
-    }) ;
+        var row = table.insertRow(-1);
+
+        if (parentData != null && data[element] != parentData[element]) {
+            row.insertCell(-1).innerHTML = "<b>" + element + "</b>";
+            //keep only 2 digits after .
+            var indexOfDot = data[element].indexOf(".");
+            if (indexOfDot == -1) {
+                row.insertCell(-1).innerHTML = "<b>" + data[element] + "</b>";
+            } else {
+                row.insertCell(-1).innerHTML = "<b>" + data[element].substring(0, indexOfDot + 3) + "</b>";
+            }
+        } else {
+            row.insertCell(-1).innerHTML = element;
+            //keep only 2 digits after .
+            var indexOfDot = data[element].indexOf(".");
+            if (indexOfDot == -1) {
+                row.insertCell(-1).innerHTML = data[element];
+            } else {
+                row.insertCell(-1).innerHTML = data[element].substring(0, indexOfDot + 3);
+            }
+        }
+    });
 }
 
-function parseData(data){
-  if (typeof data === 'string' || data instanceof String)
-  {
-    var dict = {};
-    var notTheEnd = true
-    var value;
-    while(notTheEnd)
-    {
-      var variable = data.substring(data.indexOf("(") + 1, data.indexOf(")"));
-      data = data.substring(data.indexOf("=")+1);
-      if(data.indexOf("(") != -1){
-        value= data.substring(0,data.indexOf("("));
-      }
-      else
-      {
-        value = data;
-        notTheEnd=false;
-      }
-      dict[variable]=value;
+function parseData(data) {
+    if (typeof data === 'string' || data instanceof String) {
+        var dict = {};
+        var notTheEnd = true
+        var value;
+        while (notTheEnd) {
+            var variable = data.substring(data.indexOf("(") + 1, data.indexOf(")"));
+            data = data.substring(data.indexOf("=") + 1);
+            if (data.indexOf("(") != -1) {
+                value = data.substring(0, data.indexOf("("));
+            } else {
+                value = data;
+                notTheEnd = false;
+            }
+            dict[variable] = value;
+        }
+        return dict;
     }
-    return dict;
-  }
-  return data;
+    return data;
 }

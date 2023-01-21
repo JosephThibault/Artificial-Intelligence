@@ -1,56 +1,89 @@
-h1 {
-    text-align: center;
+body {
+    font-family: Helvetica;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: rgb(242, 243, 250);
+    background-color: rgb(50, 55, 66);
 }
 
-.special
-{
-  color:red;
+h1 {
+    text-align: center;
+    margin: 10px;
+    font-size: 30px;
+}
+
+.special {
+    color: red;
+}
+
+.boxWrapper {
+    display: inline-block;
+    width: 100%;
 }
 
 #treePanel {
-  height: 650px;
-  border: solid 2px black;
-margin: 30px;
+    height: 800px;
+    border-radius: 20px;
+    margin: 30px;
+    background-color: rgb(242, 243, 250);
+    width: 60%;
+    float: left;
+}
+
+#fullAssignmentPanel {
+    width: 30%;
+    margin: 10px;
+    float: right;
+}
+
+table,
+th,
+td {
+    background-color: rgb(242, 243, 250);
+    color: rgb(50, 55, 66);
 }
 
 .selected {
-  fill: red;
+    fill: red;
 }
 
 #wrapper {
     text-align: center;
-  }
-  #inputZone {
-    display: inline-block;
-  }
+}
 
-  .node {
+#inputZone {
+    display: inline-block;
+}
+
+.node {
     cursor: pointer;
-  }
-  
-  .node circle {
+}
+
+.node circle {
     fill: #fff;
     stroke: steelblue;
     stroke-width: 1.5px;
-  }
-  
-  .node text {
+}
+
+.node text {
     font: 10px sans-serif;
-  }
-  
-  .link {
+}
+
+.link {
     fill: none;
     stroke: #ccc;
     stroke-width: 1.5px;
-  }
-  
-  table {
+}
+
+table {
     width: 500px;
     border-collapse: collapse;
     margin-left: auto;
     margin-right: auto;
-  }
+}
 
-  table, th, td {
+table,
+th,
+td {
     border: 1px solid black;
 }
