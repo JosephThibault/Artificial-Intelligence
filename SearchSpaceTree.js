@@ -8,6 +8,7 @@ var i = 0,
     root;
 var treemap;
 var svg;
+var lastClicked;
 
 // Attend que le DOM soit chargé
 document.addEventListener('DOMContentLoaded', function() {
@@ -302,7 +303,22 @@ function update(source) {
             fillpredicateTable(nodeData.state, parentData.state);
         }
 
+        const fullAssignmentPanel = document.getElementById("fullAssignmentPanel");
+        if (lastClicked === d) {
+            fullAssignmentPanel.style.right = "-500px";
+            lastClicked = null;
+        } else {
+            fullAssignmentPanel.style.right = "15px";
+            lastClicked = d;
+        }
     }
+}
+
+function closePanel()
+{
+    const fullAssignmentPanel = document.getElementById("fullAssignmentPanel");
+    fullAssignmentPanel.style.right = "-500px";
+    lastClicked = null;
 }
 
 function fillpredicateTable(data, parentData = null) {
@@ -317,9 +333,9 @@ function fillpredicateTable(data, parentData = null) {
             //keep only 2 digits after .
             var indexOfDot = data[element].indexOf(".");
             if (indexOfDot == -1) {
-                row.insertCell(-1).innerHTML = "<b>" + data[element] + "</b>";
+                row.insertCell(-1).innerHTML = "<b>"+ parentData[element] + " => <span style=\"color: red;\">"+ data[element] + "</span></b>";
             } else {
-                row.insertCell(-1).innerHTML = "<b>" + data[element].substring(0, indexOfDot + 3) + "</b>";
+                row.insertCell(-1).innerHTML = "<b>"+ parentData[element].substring(0, indexOfDot + 3) + " => <span style=\"color: red;\">" + data[element].substring(0, indexOfDot + 3) + "</span></b>";
             }
         } else {
             row.insertCell(-1).innerHTML = element;

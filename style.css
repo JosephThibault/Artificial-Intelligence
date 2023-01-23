@@ -19,21 +19,26 @@ h1 {
 .boxWrapper {
     display: inline-block;
     width: 100%;
+    padding: 20px;
 }
 
 #treePanel {
-    height: 800px;
+    height: 650px;
     border-radius: 20px;
-    margin: 30px;
     background-color: rgb(242, 243, 250);
-    width: 60%;
+    width: 100%;
     float: left;
+    text-align: center;
 }
 
 #fullAssignmentPanel {
+    position: fixed;
+    right: -500px;
     width: 30%;
-    margin: 10px;
-    float: right;
+    padding-left: 20px;
+    padding-bottom: 20px;
+    transition: right 0.5s ease-in-out;
+    background-color: rgb(50, 55, 66);
 }
 
 table,
@@ -76,14 +81,29 @@ td {
 }
 
 table {
-    width: 500px;
     border-collapse: collapse;
     margin-left: auto;
     margin-right: auto;
+    table-layout: fixed;
+    width:100%;
+    min-height: 500px;
 }
 
 table,
 th,
 td {
     border: 1px solid black;
+}
+
+.table-container {
+    height: 500px;
+    overflow-y: scroll;
+  }
+
+button {
+border: none;
+cursor: pointer;
+appearance: none;
+background-color: inherit;
+float: right;
 }
