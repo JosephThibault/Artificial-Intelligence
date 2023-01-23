@@ -6,7 +6,7 @@ body {
     background-color: rgb(50, 55, 66);
 }
 
-h1 {
+h3 {
     text-align: center;
     margin: 10px;
     font-size: 30px;
@@ -20,13 +20,15 @@ h1 {
     display: inline-block;
     width: 100%;
     padding: 20px;
+    width: 97vw;
+    height: 85vh;
 }
 
 #treePanel {
-    height: 650px;
     border-radius: 20px;
     background-color: rgb(242, 243, 250);
     width: 100%;
+    height: 100%;
     float: left;
     text-align: center;
 }
@@ -35,6 +37,7 @@ h1 {
     position: fixed;
     right: -500px;
     width: 30%;
+    height: 100%;
     padding-left: 20px;
     padding-bottom: 20px;
     transition: right 0.5s ease-in-out;
@@ -58,6 +61,8 @@ td {
 
 #inputZone {
     display: inline-block;
+    height: 3vh;
+
 }
 
 .node {
@@ -86,7 +91,6 @@ table {
     margin-right: auto;
     table-layout: fixed;
     width:100%;
-    min-height: 500px;
 }
 
 table,
@@ -96,8 +100,9 @@ td {
 }
 
 .table-container {
-    height: 500px;
+    height: 60%;
     overflow-y: scroll;
+    background-color: #fff;
   }
 
 button {
