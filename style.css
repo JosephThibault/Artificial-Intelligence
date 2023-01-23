@@ -12,6 +12,12 @@ h3 {
     font-size: 30px;
 }
 
+h5 {
+    text-align: center;
+    margin: 10px;
+    font-size: 30px;
+}
+
 .special {
     color: red;
 }
