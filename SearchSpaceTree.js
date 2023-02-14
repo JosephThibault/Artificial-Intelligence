@@ -10,10 +10,11 @@ var treemap;
 var svg;
 var lastClicked;
 
-// Attend que le DOM soit chargé
+// Waiting for the DOM to load
 document.addEventListener('DOMContentLoaded', function() {
     // append the svg object to the body of the page
     // appends a 'group' element to 'svg'
+    // moves the 'group' element to the top left margin
     svg = d3.select("#treePanel").append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
@@ -27,6 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
             svg.attr("transform", d3.event.transform);
         }))
         .append("g")
+        //.attr("transform", "translate(" +
+        //  margin.left + "," + margin.top + ")");
         // declares a tree layout and assigns the size
     treemap = d3.tree().nodeSize([25, 25]);
 
@@ -37,13 +40,14 @@ document.addEventListener('DOMContentLoaded', function() {
             var fr = new FileReader();
             fr.onload = function() {
                 treeData = fr.result.replaceAll("descendants", "children");
-                //console.log(treeData);
+                console.log(treeData);
                 loadTree();
             }
 
             fr.readAsText(this.files[0]);
         })
 })
+
 
 function loadTree() {
     // Empty predicateTable
@@ -55,6 +59,17 @@ function loadTree() {
     root.x0 = height / 2;
     root.y0 = 0;
 
+    // Getting information about the tree
+    
+    var treeSpecs = treeInfo(root)
+    var width = document.getElementById("width")
+    width.innerHTML = treeSpecs[0]
+    var height = document.getElementById("height");
+    height.innerHTML = treeSpecs[1];
+    var averageBF = document.getElementById("averageBF");
+    averageBF.innerHTML = treeSpecs[2]
+    
+    
     d3.select("g").attr("transform", "translate(" +
     (d3.select("svg").node().getBoundingClientRect().width/2) + "," 
     + (d3.select("svg").node().getBoundingClientRect().height/2) + ")");
@@ -63,7 +78,36 @@ function loadTree() {
     root.children.forEach(collapse);
 
     update(root);
+}
 
+
+//Returns the width, the height and the average branching factor of the tree
+function treeInfo(root) {
+
+    if (!root) return 0
+  
+    var currentLevel = [root]
+    var nextLevel = []
+    var width = 0
+    var totalLevels = 0
+    var n_nodes = 0
+
+    while (currentLevel.length > 0) {
+        totalLevels++
+        width = Math.max(width, currentLevel.length)
+        for (let i = 0; i < currentLevel.length; i++) {
+            let node = currentLevel[i]
+            n_nodes++
+            if (node.children) nextLevel = nextLevel.concat(node.children)
+        }
+        currentLevel = nextLevel
+        nextLevel = []
+    }
+
+    var averageBF = n_nodes/totalLevels
+    
+    return [width, root.height, Math.round(averageBF)]
+    
 }
 
 // Collapse the node and all it's children
@@ -80,10 +124,10 @@ function uncollapse(d) {
         d.children = d._children;
         d._children = null;
       }
-      if (d.children) {
+    if (d.children) {
         d.children.forEach(uncollapse);
-      }
-  }
+    }
+}
 
 function update(source) {
 
@@ -132,7 +176,6 @@ function update(source) {
             d3.select(this).select('circle.node')
                 .style("stroke", "red")
                 .style("stroke-width", "4px");
-
             click(d);
 
         })
