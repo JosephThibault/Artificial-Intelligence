@@ -14,7 +14,6 @@ var lastClicked;
 document.addEventListener('DOMContentLoaded', function() {
     // append the svg object to the body of the page
     // appends a 'group' element to 'svg'
-    // moves the 'group' element to the top left margin
     svg = d3.select("#treePanel").append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
@@ -28,8 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
             svg.attr("transform", d3.event.transform);
         }))
         .append("g")
-        //.attr("transform", "translate(" +
-        //  margin.left + "," + margin.top + ")");
         // declares a tree layout and assigns the size
     treemap = d3.tree().nodeSize([25, 25]);
 
@@ -40,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var fr = new FileReader();
             fr.onload = function() {
                 treeData = fr.result.replaceAll("descendants", "children");
-                console.log(treeData);
+                //console.log(treeData);
                 loadTree();
             }
 
@@ -58,10 +55,15 @@ function loadTree() {
     root.x0 = height / 2;
     root.y0 = 0;
 
+    d3.select("g").attr("transform", "translate(" +
+    (d3.select("svg").node().getBoundingClientRect().width/2) + "," 
+    + (d3.select("svg").node().getBoundingClientRect().height/2) + ")");
+
     // Collapse after the second level
-    //root.children.forEach(collapse);
+    root.children.forEach(collapse);
 
     update(root);
+
 }
 
 // Collapse the node and all it's children
@@ -72,6 +74,16 @@ function collapse(d) {
         d.children = null
     }
 }
+
+function uncollapse(d) {
+    if (d._children) {
+        d.children = d._children;
+        d._children = null;
+      }
+      if (d.children) {
+        d.children.forEach(uncollapse);
+      }
+  }
 
 function update(source) {
 
@@ -99,6 +111,14 @@ function update(source) {
             return "translate(" + source.y0 + "," + source.x0 + ")";
         })
         .on("click", function(d) {
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+                } else {
+                d.children = d._children;
+                d._children = null;
+                }
+            update(d)
             d3.selectAll(".node").classed("selected", false);
             d3.select(this).classed("selected", true);
             //change all other nodes outline color
@@ -112,6 +132,7 @@ function update(source) {
             d3.select(this).select('circle.node')
                 .style("stroke", "red")
                 .style("stroke-width", "4px");
+
             click(d);
 
         })
@@ -369,4 +390,9 @@ function parseData(data) {
         return dict;
     }
     return data;
+}
+
+function displayAllNodes(){
+    uncollapse(root)
+    update(root)
 }
